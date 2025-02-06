@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
  * A JUnit 5 extension that generates random values for parameters annotated with {@link Randomize}.
+ * @see org.junit.jupiter.api.extension.ParameterResolver
+ * @see RandomParametersExtension.Randomize
  */
 public class RandomParametersExtension implements ParameterResolver {
   private static final Logger LOGGER = Logger.getLogger(RandomParametersExtension.class.getName());
