@@ -28,6 +28,10 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           cache: maven
 
+      - name: Debug GPG keys
+        run: |
+          gpg --list-secret-keys --keyid-format=long
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
