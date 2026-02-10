@@ -29,7 +29,7 @@ public class RandomParametersExtension implements ParameterResolver {
   private static final Logger LOGGER = Logger.getLogger(RandomParametersExtension.class.getName());
   static final Map<Class<?>, BiFunction<ParameterContext, ExtensionContext, Object>> GENERATORS =
       Map.ofEntries(
-          Map.entry(RandomGenerator.class, RandomParametersExtension::getRandom),
+          Map.entry(RandomGenerator.class, (pc, ec) -> getRandom(getAnnotation(pc), pc)),
           Map.entry(int.class, RandomParametersExtension::generateInt),
           Map.entry(Integer.class, RandomParametersExtension::generateInt),
           Map.entry(long.class, RandomParametersExtension::generateLong),
@@ -48,8 +48,7 @@ public class RandomParametersExtension implements ParameterResolver {
   }
 
   private static RandomGenerator getRandom(
-      ParameterContext parameterContext, ExtensionContext extensionContext) {
-    Randomize annotation = getAnnotation(parameterContext);
+      Randomize annotation, ParameterContext parameterContext) {
     long seed = annotation.seed() == Long.MIN_VALUE ? System.nanoTime() : annotation.seed();
     LOGGER.info(() -> String.format("Using seed %d for %s", seed, getContext(parameterContext)));
     return new Random(seed);
@@ -67,21 +66,21 @@ public class RandomParametersExtension implements ParameterResolver {
   private static int generateInt(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     return random.nextInt(annotation.intMin(), annotation.intMax());
   }
 
   private static long generateLong(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     return random.nextLong(annotation.longMin(), annotation.longMax());
   }
 
   private static float generateFloat(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     if (!Float.isFinite(annotation.floatMax() - annotation.floatMin())) {
       return random.nextFloat();
     }
@@ -91,7 +90,7 @@ public class RandomParametersExtension implements ParameterResolver {
   private static double generateDouble(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     if (!Double.isFinite(annotation.doubleMax() - annotation.doubleMin())) {
       return random.nextDouble();
     }
@@ -100,25 +99,18 @@ public class RandomParametersExtension implements ParameterResolver {
 
   private static BigInteger generateBigInteger(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
-    Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
-    return BigInteger.valueOf(random.nextLong(annotation.longMin(), annotation.longMax()));
+    return BigInteger.valueOf(generateLong(parameterContext, extensionContext));
   }
 
   private static BigDecimal generateBigDecimal(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
-    Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
-    if (!Double.isFinite(annotation.doubleMax() - annotation.doubleMin())) {
-      return BigDecimal.valueOf(random.nextDouble());
-    }
-    return BigDecimal.valueOf(random.nextDouble(annotation.doubleMin(), annotation.doubleMax()));
+    return BigDecimal.valueOf(generateDouble(parameterContext, extensionContext));
   }
 
   private static byte[] generateBytes(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     byte[] bytes = new byte[annotation.length()];
     random.nextBytes(bytes);
     return bytes;
@@ -127,7 +119,7 @@ public class RandomParametersExtension implements ParameterResolver {
   private static String generateString(
       ParameterContext parameterContext, ExtensionContext extensionContext) {
     Randomize annotation = getAnnotation(parameterContext);
-    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    RandomGenerator random = getRandom(annotation, parameterContext);
     Set<String> blocks = Set.of(annotation.unicodeBlocks());
     StringBuilder builder = new StringBuilder(annotation.length());
     random

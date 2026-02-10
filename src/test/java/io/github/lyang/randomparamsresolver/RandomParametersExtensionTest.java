@@ -10,12 +10,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 
 class RandomParametersExtensionTest {
@@ -26,17 +23,8 @@ class RandomParametersExtensionTest {
     ParameterContext parameterContext = mock();
     when(parameterContext.getParameter()).thenReturn(parameter);
     Randomize annotation = parameter.getAnnotation(Randomize.class);
-    when(parameterContext.isAnnotated(Randomize.class)).thenReturn(Objects.nonNull(annotation));
+    when(parameterContext.isAnnotated(Randomize.class)).thenReturn(annotation != null);
     return parameterContext;
-  }
-
-  private static ExtensionContext extensionContext() {
-    ExtensionContext extensionContext = mock();
-    when(extensionContext.getRoot()).thenReturn(extensionContext);
-    ExtensionContext.Store store = mock();
-    when(extensionContext.getStore(ExtensionContext.Namespace.GLOBAL)).thenReturn(store);
-    when(store.getOrComputeIfAbsent(Random.class)).thenReturn(new Random());
-    return extensionContext;
   }
 
   @BeforeEach
@@ -48,7 +36,7 @@ class RandomParametersExtensionTest {
   void supported_parameter_types() throws NoSuchMethodException {
     for (Class<?> type : RandomParametersExtension.GENERATORS.keySet()) {
       ParameterContext parameterContext = parameterContext(parameter("annotated", type));
-      assertThat(extension.supportsParameter(parameterContext, extensionContext()))
+      assertThat(extension.supportsParameter(parameterContext, mock()))
           .withFailMessage("Support %s", type.getSimpleName())
           .isTrue();
     }
@@ -58,7 +46,7 @@ class RandomParametersExtensionTest {
   void unannotated_parameters() throws NoSuchMethodException {
     for (Class<?> type : RandomParametersExtension.GENERATORS.keySet()) {
       ParameterContext parameterContext = parameterContext(parameter("unannotated", type));
-      assertThat(extension.supportsParameter(parameterContext, extensionContext()))
+      assertThat(extension.supportsParameter(parameterContext, mock()))
           .withFailMessage("Support %s", type.getSimpleName())
           .isFalse();
     }
@@ -67,14 +55,14 @@ class RandomParametersExtensionTest {
   @Test
   void unsupported_parameter() throws NoSuchMethodException {
     ParameterContext parameterContext = parameterContext(parameter("annotated", Void.class));
-    assertThat(extension.supportsParameter(parameterContext, extensionContext())).isFalse();
+    assertThat(extension.supportsParameter(parameterContext, mock())).isFalse();
   }
 
   @Test
   void resolve_parameter() throws NoSuchMethodException {
     for (Class<?> type : RandomParametersExtension.GENERATORS.keySet()) {
       ParameterContext parameterContext = parameterContext(parameter("annotated", type));
-      assertThat(extension.resolveParameter(parameterContext, extensionContext())).isNotNull();
+      assertThat(extension.resolveParameter(parameterContext, mock())).isNotNull();
     }
   }
 
@@ -82,7 +70,7 @@ class RandomParametersExtensionTest {
   void resolve_bounded_parameter() throws NoSuchMethodException {
     for (Class<?> type : List.of(float.class, double.class, BigDecimal.class)) {
       ParameterContext parameterContext = parameterContext(parameter("boundedAnnotated", type));
-      assertThat(extension.resolveParameter(parameterContext, extensionContext())).isNotNull();
+      assertThat(extension.resolveParameter(parameterContext, mock())).isNotNull();
     }
   }
 
