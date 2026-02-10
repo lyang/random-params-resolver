@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Executable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -32,6 +34,12 @@ public class RandomParametersExtension implements ParameterResolver {
           Map.entry(Integer.class, RandomParametersExtension::generateInt),
           Map.entry(long.class, RandomParametersExtension::generateLong),
           Map.entry(Long.class, RandomParametersExtension::generateLong),
+          Map.entry(float.class, RandomParametersExtension::generateFloat),
+          Map.entry(Float.class, RandomParametersExtension::generateFloat),
+          Map.entry(double.class, RandomParametersExtension::generateDouble),
+          Map.entry(Double.class, RandomParametersExtension::generateDouble),
+          Map.entry(BigInteger.class, RandomParametersExtension::generateBigInteger),
+          Map.entry(BigDecimal.class, RandomParametersExtension::generateBigDecimal),
           Map.entry(byte[].class, RandomParametersExtension::generateBytes),
           Map.entry(String.class, RandomParametersExtension::generateString));
 
@@ -68,6 +76,43 @@ public class RandomParametersExtension implements ParameterResolver {
     Randomize annotation = getAnnotation(parameterContext);
     RandomGenerator random = getRandom(parameterContext, extensionContext);
     return random.nextLong(annotation.longMin(), annotation.longMax());
+  }
+
+  private static float generateFloat(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
+    Randomize annotation = getAnnotation(parameterContext);
+    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    if (!Float.isFinite(annotation.floatMax() - annotation.floatMin())) {
+      return random.nextFloat();
+    }
+    return random.nextFloat(annotation.floatMin(), annotation.floatMax());
+  }
+
+  private static double generateDouble(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
+    Randomize annotation = getAnnotation(parameterContext);
+    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    if (!Double.isFinite(annotation.doubleMax() - annotation.doubleMin())) {
+      return random.nextDouble();
+    }
+    return random.nextDouble(annotation.doubleMin(), annotation.doubleMax());
+  }
+
+  private static BigInteger generateBigInteger(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
+    Randomize annotation = getAnnotation(parameterContext);
+    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    return BigInteger.valueOf(random.nextLong(annotation.longMin(), annotation.longMax()));
+  }
+
+  private static BigDecimal generateBigDecimal(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
+    Randomize annotation = getAnnotation(parameterContext);
+    RandomGenerator random = getRandom(parameterContext, extensionContext);
+    if (!Double.isFinite(annotation.doubleMax() - annotation.doubleMin())) {
+      return BigDecimal.valueOf(random.nextDouble());
+    }
+    return BigDecimal.valueOf(random.nextDouble(annotation.doubleMin(), annotation.doubleMax()));
   }
 
   private static byte[] generateBytes(
@@ -119,8 +164,9 @@ public class RandomParametersExtension implements ParameterResolver {
 
   /**
    * Annotation to generate random values for parameters. The supported parameter types are {@link
-   * RandomGenerator}, {@link Integer}, {@link Long}, {@link String}, {@code int}, {@code long} and
-   * {@code byte[]}.
+   * RandomGenerator}, {@link Integer}, {@link Long}, {@link Float}, {@link Double}, {@link
+   * BigInteger}, {@link BigDecimal}, {@link String}, {@code int}, {@code long}, {@code float},
+   * {@code double} and {@code byte[]}.
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.PARAMETER)
@@ -131,11 +177,23 @@ public class RandomParametersExtension implements ParameterResolver {
     /** The maximum value for the generated integer. */
     int intMax() default Integer.MAX_VALUE;
 
-    /** The minimum value for the generated long. */
+    /** The minimum value for the generated long. Also used for {@link BigInteger}. */
     long longMin() default Long.MIN_VALUE;
 
-    /** The maximum value for the generated long. */
+    /** The maximum value for the generated long. Also used for {@link BigInteger}. */
     long longMax() default Long.MAX_VALUE;
+
+    /** The minimum value for the generated float. */
+    float floatMin() default -Float.MAX_VALUE;
+
+    /** The maximum value for the generated float. */
+    float floatMax() default Float.MAX_VALUE;
+
+    /** The minimum value for the generated double. Also used for {@link BigDecimal}. */
+    double doubleMin() default -Double.MAX_VALUE;
+
+    /** The maximum value for the generated double. Also used for {@link BigDecimal}. */
+    double doubleMax() default Double.MAX_VALUE;
 
     /** The length of the generated byte array or string. The default is {@code 5}. */
     int length() default 5;

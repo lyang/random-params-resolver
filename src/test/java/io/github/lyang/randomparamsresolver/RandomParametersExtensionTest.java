@@ -6,7 +6,10 @@ import static org.mockito.Mockito.when;
 
 import io.github.lyang.randomparamsresolver.RandomParametersExtension.Randomize;
 import java.lang.reflect.Parameter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.random.RandomGenerator;
@@ -75,6 +78,14 @@ class RandomParametersExtensionTest {
     }
   }
 
+  @Test
+  void resolve_bounded_parameter() throws NoSuchMethodException {
+    for (Class<?> type : List.of(float.class, double.class, BigDecimal.class)) {
+      ParameterContext parameterContext = parameterContext(parameter("boundedAnnotated", type));
+      assertThat(extension.resolveParameter(parameterContext, extensionContext())).isNotNull();
+    }
+  }
+
   private Parameter parameter(String method, Class<?> clazz) throws NoSuchMethodException {
     return getClass().getDeclaredMethod(method, clazz).getParameters()[0];
   }
@@ -110,12 +121,57 @@ class RandomParametersExtensionTest {
   }
 
   @SuppressWarnings("unused")
+  private void annotated(@Randomize float value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize Float value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize double value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize Double value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize BigInteger value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize BigDecimal value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
   private void annotated(@Randomize String value) {
     throw new UnsupportedOperationException(String.valueOf(value));
   }
 
   @SuppressWarnings("unused")
   private void annotated(@Randomize Void value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(floatMin = 0.0f, floatMax = 1.0f) float value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(doubleMin = 0.0, doubleMax = 1.0) double value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(doubleMin = 0.0, doubleMax = 1.0) BigDecimal value) {
     throw new UnsupportedOperationException(String.valueOf(value));
   }
 
@@ -147,6 +203,36 @@ class RandomParametersExtensionTest {
   @SuppressWarnings("unused")
   private void unannotated(byte[] value) {
     throw new UnsupportedOperationException(Arrays.toString(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(float value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(Float value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(double value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(Double value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(BigInteger value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(BigDecimal value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
   }
 
   @SuppressWarnings("unused")
