@@ -68,7 +68,8 @@ class RandomParametersExtensionTest {
 
   @Test
   void resolve_bounded_parameter() throws NoSuchMethodException {
-    for (Class<?> type : List.of(float.class, double.class, BigDecimal.class)) {
+    for (Class<?> type :
+        List.of(byte.class, short.class, char.class, float.class, double.class, BigDecimal.class)) {
       ParameterContext parameterContext = parameterContext(parameter("boundedAnnotated", type));
       assertThat(extension.resolveParameter(parameterContext, mock())).isNotNull();
     }
@@ -139,12 +140,57 @@ class RandomParametersExtensionTest {
   }
 
   @SuppressWarnings("unused")
+  private void annotated(@Randomize byte value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize Byte value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize short value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize Short value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize char value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void annotated(@Randomize Character value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
   private void annotated(@Randomize String value) {
     throw new UnsupportedOperationException(String.valueOf(value));
   }
 
   @SuppressWarnings("unused")
   private void annotated(@Randomize Void value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(byteMin = 0, byteMax = 100) byte value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(shortMin = 0, shortMax = 100) short value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void boundedAnnotated(@Randomize(charMin = 'A', charMax = 'Z') char value) {
     throw new UnsupportedOperationException(String.valueOf(value));
   }
 
@@ -220,6 +266,36 @@ class RandomParametersExtensionTest {
 
   @SuppressWarnings("unused")
   private void unannotated(BigDecimal value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(byte value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(Byte value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(short value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(Short value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(char value) {
+    throw new UnsupportedOperationException(String.valueOf(value));
+  }
+
+  @SuppressWarnings("unused")
+  private void unannotated(Character value) {
     throw new UnsupportedOperationException(String.valueOf(value));
   }
 
